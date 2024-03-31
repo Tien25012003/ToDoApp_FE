@@ -9,24 +9,28 @@ import {
 import React, {useCallback} from 'react';
 import {COLORS} from '@utils/colors';
 import Animated, {
+  SharedValue,
   useAnimatedStyle,
-  useDerivedValue,
   withSpring,
 } from 'react-native-reanimated';
 import {TAB} from '..';
+import FloatButton from './FloatButton';
 const {width} = Dimensions.get('screen');
 type Props = {
   tab?: TAB;
   onPressTodo: () => void;
   onPressDone: () => void;
+  animatedValue: SharedValue<number>;
 };
-const TabBar = ({onPressTodo, onPressDone, tab = 'Todo'}: Props) => {
-  const animatedValue = useDerivedValue(
-    () => (tab === 'Todo' ? 0 : width * 0.5),
-    [tab],
-  );
+const TabBar = ({
+  onPressTodo,
+  onPressDone,
+  tab = 'Todo',
+  animatedValue,
+}: Props) => {
   const _onPressTodo = useCallback(() => {
     if (tab === 'Todo') return;
+    animatedValue.value = 0;
     InteractionManager.runAfterInteractions(() => {
       onPressTodo();
     });
@@ -34,6 +38,7 @@ const TabBar = ({onPressTodo, onPressDone, tab = 'Todo'}: Props) => {
 
   const _onPressDone = useCallback(() => {
     if (tab === 'Done') return;
+    animatedValue.value = width * 0.5;
     InteractionManager.runAfterInteractions(() => {
       onPressDone();
     });
@@ -60,7 +65,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     width: width,
     backgroundColor: COLORS.white,
-    elevation: 5,
+    elevation: 10,
   },
   tabWrapper: {
     flex: 1,

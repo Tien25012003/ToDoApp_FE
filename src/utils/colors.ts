@@ -9,5 +9,5 @@ const COLORS = {
   lightGray: '#d2d2d2',
   lightRed: '#e65b5b',
 };
-export const {width} = Dimensions.get('screen');
+export const {width, height} = Dimensions.get('screen');
 export {COLORS};

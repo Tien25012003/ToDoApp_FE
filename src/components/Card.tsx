@@ -5,8 +5,7 @@ import {
   TouchableOpacity,
   Pressable,
 } from 'react-native';
-import React, {memo, useMemo, useState} from 'react';
-import {TAB} from '@screens/HomeScreen';
+import React, {Dispatch, SetStateAction, memo, useMemo, useState} from 'react';
 import {COLORS, width} from '@utils/colors';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -16,34 +15,40 @@ import {
   PanGesture,
   PanGestureHandlerProps,
   PanGestureHandler,
+  GestureType,
 } from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-type TCard = {
-  priority?: 'High' | 'Medium';
-  title?: string;
-  status?: TAB;
-  simultaneousHandlers:
-    | React.RefObject<PanGestureHandler | undefined>
-    | React.RefObject<React.ComponentType<{}> | undefined>;
+import {useAtom} from 'jotai';
+import {removeTask} from '@state/store';
+type TCard = ITask & {
+  simultaneousHandlers: any;
+  onUpdateTaskStatus: () => void;
+  onEditTask: () => void;
 } & Pick<PanGestureHandlerProps, 'simultaneousHandlers'>;
 const CARD_COLOR = {
   High: COLORS.red,
   Medium: COLORS.blue,
   Done: COLORS.green,
 };
-const RIGHT_ACTION_WIDTH = 80;
+const RIGHT_ACTION_WIDTH = 140;
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 const Card = ({
+  id,
   priority = 'High',
-  title = 'To do title',
+  taskName = 'To do taskName',
   status = 'Todo',
+  createdAt = 1711821657613,
+  description,
   simultaneousHandlers,
+  onUpdateTaskStatus,
+  onEditTask,
 }: TCard) => {
-  const [isCheck, setIsScheck] = useState(status === 'Done');
+  const [, removeTaskAtom] = useAtom(removeTask);
+
   const cardBorderColor = useMemo(
     () => (status === 'Todo' ? CARD_COLOR[priority] : CARD_COLOR.Done),
     [status, priority],
@@ -57,19 +62,21 @@ const Card = ({
     .onUpdate(e => {
       if (
         e.translationX + startX.value < 0 &&
-        e.translationX + startX.value > -(RIGHT_ACTION_WIDTH - 20)
+        e.translationX + startX.value > -(RIGHT_ACTION_WIDTH - 10)
       ) {
         offset.value = e.translationX + startX.value;
       }
     })
     .onEnd(e => {
       if (e.translationX < 0) {
-        offset.value = -(RIGHT_ACTION_WIDTH - 20);
+        offset.value = -(RIGHT_ACTION_WIDTH - 10);
       } else {
         offset.value = 0;
       }
     })
-    .simultaneousWithExternalGesture(simultaneousHandlers);
+    .simultaneousWithExternalGesture(simultaneousHandlers)
+    .failOffsetY([-5, 5])
+    .activeOffsetY([-5, 5]);
   const cardAnimatedStyle = useAnimatedStyle(() => ({
     transform: [
       {
@@ -82,16 +89,34 @@ const Card = ({
   }));
   const onPress = () => {
     if (offset.value === 0) {
-      offset.value = -(RIGHT_ACTION_WIDTH - 20);
+      offset.value = -(RIGHT_ACTION_WIDTH - 10);
     } else {
       offset.value = 0;
     }
   };
+  const onRemoveTask = () => {
+    removeTaskAtom({id: id});
+  };
   return (
     <View style={styles.wrapper}>
-      <TouchableOpacity style={styles.actionRightContainer}>
-        <FontAwesome name="trash-o" color={COLORS.white} size={30} />
-      </TouchableOpacity>
+      <View style={styles.actionRightContainer}>
+        {status === 'Todo' && (
+          <TouchableOpacity
+            onPress={() => {
+              onEditTask();
+              offset.value = 0;
+            }}
+            style={[styles.actionRight, {backgroundColor: COLORS.blue}]}>
+            <FontAwesome name="edit" color={COLORS.white} size={30} />
+          </TouchableOpacity>
+        )}
+
+        <TouchableOpacity
+          onPress={onRemoveTask}
+          style={[styles.actionRight, {backgroundColor: COLORS.lightRed}]}>
+          <FontAwesome name="trash-o" color={COLORS.white} size={30} />
+        </TouchableOpacity>
+      </View>
       <GestureDetector gesture={pan}>
         <AnimatedPressable
           style={[
@@ -100,13 +125,21 @@ const Card = ({
             cardAnimatedStyle,
           ]}
           onPress={onPress}>
-          <Text style={styles.title} numberOfLines={2}>
-            {title}
-          </Text>
-          <TouchableOpacity
-            style={styles.circle}
-            onPress={() => setIsScheck(!isCheck)}>
-            {isCheck && (
+          <View style={{width: '80%'}}>
+            <Text style={styles.date}>
+              {new Date(createdAt)?.toLocaleDateString()}
+            </Text>
+            <Text style={styles.taskName} numberOfLines={1}>
+              {taskName}
+            </Text>
+            {description && (
+              <Text style={styles.description} numberOfLines={2}>
+                {description}
+              </Text>
+            )}
+          </View>
+          <TouchableOpacity style={styles.circle} onPress={onUpdateTaskStatus}>
+            {status === 'Done' && (
               <FontAwesome6 name="check" size={18} color={COLORS.green} />
             )}
           </TouchableOpacity>
@@ -136,9 +169,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     alignItems: 'center',
   },
-  title: {
+  taskName: {
     color: COLORS.gray,
-    width: '80%',
+    fontWeight: '500',
+  },
+  date: {
+    fontSize: 12,
+    color: COLORS.lightGray,
+  },
+  description: {
+    fontSize: 12,
+    color: COLORS.gray,
+    opacity: 0.6,
   },
   circle: {
     width: 30,
@@ -154,10 +196,15 @@ const styles = StyleSheet.create({
     right: 0,
     height: '100%',
     width: RIGHT_ACTION_WIDTH,
+    overflow: 'hidden',
+    borderRadius: 10,
+    flexDirection: 'row',
+  },
+  actionRight: {
+    height: '100%',
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: COLORS.lightRed,
-    borderRadius: 10,
   },
 });
 export default memo(Card);
