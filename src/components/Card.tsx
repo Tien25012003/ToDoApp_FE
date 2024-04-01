@@ -95,6 +95,7 @@ const Card = ({
     }
   };
   const onRemoveTask = () => {
+    // xoa db
     removeTaskAtom({id: id});
   };
   return (

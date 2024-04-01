@@ -24,7 +24,10 @@ const ListCard = ({data = [], ...rest}: Props) => {
           priority={item.priority}
           simultaneousHandlers={ref}
           description={item.description}
-          onUpdateTaskStatus={() => updateTaskStatusAtom({task: item})}
+          onUpdateTaskStatus={() => {
+            // update db
+            updateTaskStatusAtom({task: item});
+          }}
           onEditTask={() => {
             setTaskEdit(item);
             setOpenEdit(true);
@@ -43,6 +46,8 @@ const ListCard = ({data = [], ...rest}: Props) => {
         simultaneousHandlers={ref}
         ref={ref}
         {...rest}
+        // paging
+        //onScroll={}
       />
       {openEdit && (
         <FormAddTask

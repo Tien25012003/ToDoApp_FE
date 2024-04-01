@@ -6,13 +6,15 @@ import {Host} from 'react-native-portalize';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {Provider} from 'jotai';
 import {store} from '@state/store';
+import Draft from '@screens/draft';
 const App = () => {
   return (
     <Provider store={store}>
       <GestureHandlerRootView style={{flex: 1}}>
         <Host>
           <StatusBar backgroundColor={COLORS.white} barStyle={'dark-content'} />
-          <HomeScreen />
+          {/* <HomeScreen /> */}
+          <Draft />
         </Host>
       </GestureHandlerRootView>
     </Provider>

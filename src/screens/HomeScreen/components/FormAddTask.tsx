@@ -78,8 +78,10 @@ const FormAddTask = ({
         createdAt: new Date().getTime(),
         status: 'Todo',
       };
+      // add to db
       addTaskAtom({newItem});
     } else {
+      // update to db
       updateTaskAtom({task: {...(newTask as ITask)}});
     }
 

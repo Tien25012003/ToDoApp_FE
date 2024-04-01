@@ -1,4 +1,4 @@
-import {View, StyleSheet} from 'react-native';
+import {View, StyleSheet, Button} from 'react-native';
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import TabBar from './components/TabBar';
 import {COLORS, height, width} from '@utils/colors';
@@ -17,11 +17,14 @@ import FormAddTask from './components/FormAddTask';
 import {Tasks, store} from '@state/store';
 import {useAtom} from 'jotai';
 import {SlideInDown, SlideOutUp} from 'react-native-reanimated';
+import {API_GET, API_POST, TResponse} from '@services/api';
+import {PATH} from '@services/path';
 const HomeScreen = () => {
   const [openFormAdd, setOpenAddForm] = useState(false);
-  const [showButtonAdd, setShowButtonAdd] = useState(false);
+  const [showButtonAdd, setShowButtonAdd] = useState(true);
   const [tasks] = useAtom(Tasks);
   useEffect(() => {
+    // fetch db
     store.set(Tasks, DATA);
   }, []);
 
@@ -33,9 +36,11 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Header />
+      {/* <Header /> */}
       <View style={{width}}>
         <ListCard
+          ListHeaderComponent={<Header />}
+          stickyHeaderIndices={[0]}
           data={tasks}
           onScroll={e => {
             if (e.nativeEvent.contentOffset.y > height && showButtonAdd) {

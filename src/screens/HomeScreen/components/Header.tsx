@@ -10,27 +10,34 @@ const Header = () => {
       setSearch('');
     }
     if (Keyboard.isVisible()) {
-      console.log('close keyboard');
+      //console.log('close keyboard');
       Keyboard.dismiss();
     }
   }, []);
+
   return (
-    <View style={styles.searchContainer}>
-      <AntDesign name="search1" size={20} color={COLORS.gray} />
-      <TextInput
-        style={styles.input}
-        placeholder="Search ..."
-        placeholderTextColor={COLORS.lightGray}
-        defaultValue={search}
-        onChangeText={setSearch}
-      />
-      <TouchableOpacity onPress={onClear}>
-        <AntDesign name="closecircle" size={20} color={COLORS.lightGray} />
-      </TouchableOpacity>
+    <View style={styles.wrapper}>
+      <View style={styles.searchContainer}>
+        <AntDesign name="search1" size={20} color={COLORS.gray} />
+        <TextInput
+          style={styles.input}
+          placeholder="Search ..."
+          placeholderTextColor={COLORS.lightGray}
+          defaultValue={search}
+          onChangeText={setSearch}
+        />
+        <TouchableOpacity onPress={onClear}>
+          <AntDesign name="closecircle" size={20} color={COLORS.lightGray} />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 const styles = StyleSheet.create({
+  wrapper: {
+    backgroundColor: COLORS.white,
+    width: width,
+  },
   searchContainer: {
     borderRadius: 10,
     borderWidth: 1,
@@ -41,6 +48,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     alignSelf: 'center',
     marginVertical: 10,
+    backgroundColor: COLORS.white,
   },
   input: {
     flex: 1,
