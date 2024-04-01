@@ -23,9 +23,9 @@ export const API_POST = <
       .post()
       .json<TResponse<Res>>()
       .then(res => {
-        const {data} = res;
+        const {message} = res;
         console.log(`>>>>>>${url} - POST - response >>>>>> ${res}`);
-        console.log(data);
+        console.log(message);
         resolve(res);
       })
       .catch(e => {
@@ -46,10 +46,10 @@ export const API_GET = <P extends ParamType = {}, Res = any>(options: {
       .get()
       .json<TResponse<Res>>()
       .then(res => {
-        const {data} = res;
+        const {message} = res;
         console.log(`>>>>>>${url} - GET - response >>>>>>`);
         //resolve(data);
-        console.log(data);
+        console.log(message);
         resolve(res);
       })
       .catch(e => {
@@ -77,9 +77,9 @@ export const API_PUT = <
       .put()
       .json<TResponse<Res>>()
       .then(res => {
-        const {data} = res;
+        const {message} = res;
         console.log(`>>>>>>${url} - PUT - response >>>>>> ${res}`);
-        console.log(data);
+        console.log(message);
         resolve(res);
       })
       .catch(e => {
@@ -100,10 +100,10 @@ export const API_DELETE = <P extends ParamType = {}, Res = any>(options: {
       .delete()
       .json<TResponse<Res>>()
       .then(res => {
-        const {data} = res;
+        const {message} = res;
         console.log(`>>>>>>${url} - DELETE - response >>>>>>`);
         //resolve(data);
-        console.log(data);
+        console.log(message);
         resolve(res);
       })
       .catch(e => {
