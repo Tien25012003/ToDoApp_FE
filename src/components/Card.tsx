@@ -24,6 +24,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import {useAtom} from 'jotai';
 import {removeTask} from '@state/store';
+import { API_DELETE } from '@services/api';
+import { PATH } from '@services/path';
 type TCard = ITask & {
   simultaneousHandlers: any;
   onUpdateTaskStatus: () => void;
@@ -94,9 +96,22 @@ const Card = ({
       offset.value = 0;
     }
   };
-  const onRemoveTask = () => {
-    // xoa db
-    removeTaskAtom({id: id});
+  const onRemoveTask = async () => {
+    try {
+      const response = await API_DELETE({
+        url: PATH.TODO.DELETE_TODO,
+        params: { id },
+      });
+
+      if (response.success) {
+        console.log('Xóa card thành công!!!');
+        removeTaskAtom({id: id});
+      } else {
+        console.error(response.error);
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
   return (
     <View style={styles.wrapper}>

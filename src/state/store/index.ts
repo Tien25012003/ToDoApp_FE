@@ -38,3 +38,10 @@ export const updateTask = atom(
     set(Tasks, [...updatedTasks]);
   },
 );
+
+export const addTasks = atom(
+  null,
+  (get, set, { newTasks }: { newTasks: ITask[] }) => {
+    set(Tasks, (currentTasks) => [...currentTasks, ...newTasks]);
+  }
+);
