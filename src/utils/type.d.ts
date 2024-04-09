@@ -1,5 +1,5 @@
 declare interface ITask {
-  id: string;
+  _id: string;
   taskName: string;
   priority: 'High' | 'Medium';
   status: 'Todo' | 'Done';

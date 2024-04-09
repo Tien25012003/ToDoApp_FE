@@ -39,7 +39,7 @@ const CARD_COLOR = {
 const RIGHT_ACTION_WIDTH = 140;
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 const Card = ({
-  id,
+  _id,
   priority = 'High',
   taskName = 'To do taskName',
   status = 'Todo',
@@ -100,12 +100,12 @@ const Card = ({
     try {
       const response = await API_DELETE({
         url: PATH.TODO.DELETE_TODO,
-        params: { id },
+        params: {id: _id},
       });
-
       if (response.success) {
         console.log('Xóa card thành công!!!');
-        removeTaskAtom({id: id});
+        console.log('ID được xóa là: '+_id);
+        removeTaskAtom({id: _id});
       } else {
         console.error(response.error);
       }
@@ -113,6 +113,7 @@ const Card = ({
       console.error(error);
     }
   };
+
   return (
     <View style={styles.wrapper}>
       <View style={styles.actionRightContainer}>

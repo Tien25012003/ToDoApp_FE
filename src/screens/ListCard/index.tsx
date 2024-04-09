@@ -27,12 +27,12 @@ const ListCard = ({data = [], ...rest}: Props) => {
   }, []);
 
   const loadMoreTasks = async () => {
-    if (!hasMoreData) return; 
+    if (!hasMoreData) return;
     setIsLoading(true);
     try {
       const response = await API_GET({
         url: `${PATH.TODO.GET_TODO}/pagination`,
-        params: { page: currentPage, limit: 8 },
+        params: {page: currentPage, limit: 8},
       });
   
       console.log('current page:', currentPage);
@@ -40,9 +40,9 @@ const ListCard = ({data = [], ...rest}: Props) => {
         const newTasks: ITask[] = response.data;
         console.log('New Tasks:', newTasks);
         console.log('Get tasks successfully!');
-        addTasksAtom({ newTasks: newTasks });
+        addTasksAtom({ newTasks });
         if (newTasks.length === 0) {
-          setHasMoreData(false); 
+          setHasMoreData(false);
         } else {
           setCurrentPage(currentPage + 1);
         }
@@ -67,7 +67,7 @@ const ListCard = ({data = [], ...rest}: Props) => {
     return (
       <View key={index}>
         <Card
-          id={item.id}
+          _id={item._id}
           taskName={item.taskName}
           status={item.status}
           priority={item.priority}
