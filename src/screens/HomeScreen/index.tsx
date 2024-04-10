@@ -24,8 +24,19 @@ const HomeScreen = () => {
   const [showButtonAdd, setShowButtonAdd] = useState(true);
   const [tasks] = useAtom(Tasks);
   useEffect(() => {
-    // fetch db
-    store.set(Tasks, DATA);
+    const fetchData = async () => {
+      try {
+        const res: TResponse<ITask> = await API_GET({
+          url: PATH.TODO.GET_TODO,
+        });
+        const data = res.message;
+        store.set(Tasks, [data]);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const [newTask, setNewTask] = useState<Partial<ITask>>({
