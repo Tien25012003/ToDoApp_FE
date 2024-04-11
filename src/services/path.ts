@@ -6,9 +6,9 @@ export const PATH = {
     UPDATE_EXAM: '/exams/updateExam',
   },
   TODO: {
-    ADD_TODO: '/addTodo',
-    GET_TODO: '/getTodo',
+    ADD_TODO: '/addTask',
+    GET_TODO: '/tasks',
     DELETE_TODO: '/deleteTodo',
-    UPDATE_TODO: '/updateTodo',
+    UPDATE_TODO: '/updateTask',
   },
 };

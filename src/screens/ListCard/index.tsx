@@ -5,6 +5,8 @@ import Card from '@components/Card';
 import {useAtom} from 'jotai';
 import {updateTaskStatus} from '@state/store';
 import FormAddTask from '@screens/HomeScreen/components/FormAddTask';
+import { API_POST } from '@services/api';
+import { PATH } from '@services/path';
 type Props = {
   data?: ITask[];
 } & Partial<FlatListProps<any>>;
@@ -24,8 +26,18 @@ const ListCard = ({data = [], ...rest}: Props) => {
           priority={item.priority}
           simultaneousHandlers={ref}
           description={item.description}
-          onUpdateTaskStatus={() => {
+          onUpdateTaskStatus={async() => {
             // update db
+            await API_POST({
+              url: PATH.TODO.UPDATE_TODO,
+              request: item,
+            })
+              .then(response => {
+                console.log(response);
+              })
+              .catch(error => {
+                console.error(error);
+              });
             updateTaskStatusAtom({task: item});
           }}
           onEditTask={() => {

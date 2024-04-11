@@ -13,6 +13,8 @@ import {useAtom} from 'jotai';
 import {addTask, updateTask} from '@state/store';
 import {ZoomIn, ZoomOut} from 'react-native-reanimated';
 import Animated from 'react-native-reanimated';
+import { API_POST } from '@services/api';
+import { PATH } from '@services/path';
 type TPrority = 'High' | 'Medium';
 type Props = {
   visible?: boolean;
@@ -60,7 +62,7 @@ const FormAddTask = ({
       [field]: value,
     }));
   };
-  const onAddTask = () => {
+  const onAddTask = async() => {
     if (newTask.taskName === '') {
       setError(true);
       return;
@@ -79,9 +81,18 @@ const FormAddTask = ({
         status: 'Todo',
       };
       // add to db
+      await API_POST({
+        url: PATH.TODO.ADD_TODO,
+        request: newItem,
+      })
+        .then(response => {
+          console.log(response);
+        })
+        .catch(error => {
+          console.error(error);
+        });
       addTaskAtom({newItem});
     } else {
-      // update to db
       updateTaskAtom({task: {...(newTask as ITask)}});
     }
 
