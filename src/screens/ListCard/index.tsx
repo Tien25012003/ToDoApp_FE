@@ -7,8 +7,7 @@ import {Tasks, addTask, updateTaskStatus, addTasks} from '@state/store';
 import FormAddTask from '@screens/HomeScreen/components/FormAddTask';
 import {PATH} from '@services/path';
 import {API_GET, TResponse} from '../../services/api';
-
-
+import {API_POST} from '@services/api';
 type Props = {
   data?: ITask[];
 } & Partial<FlatListProps<any>>;
@@ -34,13 +33,13 @@ const ListCard = ({data = [], ...rest}: Props) => {
         url: `${PATH.TODO.GET_TODO}/pagination`,
         params: {page: currentPage, limit: 8},
       });
-  
+
       console.log('current page:', currentPage);
       if (response.data && Array.isArray(response.data)) {
         const newTasks: ITask[] = response.data;
         console.log('New Tasks:', newTasks);
         console.log('Get tasks successfully!');
-        addTasksAtom({ newTasks });
+        addTasksAtom({newTasks});
         if (newTasks.length === 0) {
           setHasMoreData(false);
         } else {
@@ -62,7 +61,6 @@ const ListCard = ({data = [], ...rest}: Props) => {
     }
   };
 
-
   const renderItem = ({item, index}: ListRenderItemInfo<ITask>) => {
     return (
       <View key={index}>
@@ -73,8 +71,18 @@ const ListCard = ({data = [], ...rest}: Props) => {
           priority={item.priority}
           simultaneousHandlers={ref}
           description={item.description}
-          onUpdateTaskStatus={() => {
+          onUpdateTaskStatus={async () => {
             // update db
+            await API_POST({
+              url: PATH.TODO.UPDATE_TODO,
+              request: item,
+            })
+              .then(response => {
+                console.log(response);
+              })
+              .catch(error => {
+                console.error(error);
+              });
             updateTaskStatusAtom({task: item});
           }}
           onEditTask={() => {
@@ -95,7 +103,7 @@ const ListCard = ({data = [], ...rest}: Props) => {
         simultaneousHandlers={ref}
         ref={ref}
         {...rest}
-        onEndReached={onEndReached} 
+        onEndReached={onEndReached}
         onEndReachedThreshold={0.9}
         // paging
         //onScroll={}
