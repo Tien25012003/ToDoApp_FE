@@ -24,6 +24,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import {useAtom} from 'jotai';
 import {removeTask} from '@state/store';
+import { API_DELETE } from '@services/api';
+import { PATH } from '@services/path';
 type TCard = ITask & {
   simultaneousHandlers: any;
   onUpdateTaskStatus: () => void;
@@ -37,7 +39,7 @@ const CARD_COLOR = {
 const RIGHT_ACTION_WIDTH = 140;
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 const Card = ({
-  id,
+  _id,
   priority = 'High',
   taskName = 'To do taskName',
   status = 'Todo',
@@ -94,10 +96,24 @@ const Card = ({
       offset.value = 0;
     }
   };
-  const onRemoveTask = () => {
-    // xoa db
-    removeTaskAtom({id: id});
+  const onRemoveTask = async () => {
+    try {
+      const response = await API_DELETE({
+        url: PATH.TODO.DELETE_TODO,
+        params: {id: _id},
+      });
+      if (response.success) {
+        console.log('Xóa card thành công!!!');
+        console.log('ID được xóa là: '+_id);
+        removeTaskAtom({id: _id});
+      } else {
+        console.error(response.error);
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
+
   return (
     <View style={styles.wrapper}>
       <View style={styles.actionRightContainer}>
