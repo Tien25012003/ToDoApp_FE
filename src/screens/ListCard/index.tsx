@@ -2,59 +2,50 @@ import {View, ListRenderItemInfo, FlatListProps} from 'react-native';
 import React, {useRef, useState, useEffect} from 'react';
 import {FlatList} from 'react-native-gesture-handler';
 import Card from '@components/Card';
-import {useAtom} from 'jotai';
+import {useAtom, useAtomValue} from 'jotai';
 import {Tasks, addTask, updateTaskStatus, addTasks} from '@state/store';
 import FormAddTask from '@screens/HomeScreen/components/FormAddTask';
 import {PATH} from '@services/path';
-import {API_GET, TResponse} from '../../services/api';
+import {API_GET, API_PUT, TResponse} from '../../services/api';
 import {API_POST} from '@services/api';
-type Props = {
-  data?: ITask[];
-} & Partial<FlatListProps<any>>;
-const ListCard = ({data = [], ...rest}: Props) => {
+import DeviceInfo from 'react-native-device-info';
+import {FA6Style} from 'react-native-vector-icons/FontAwesome6';
+type Props = {} & Partial<FlatListProps<any>>;
+const ListCard = ({...rest}: Props) => {
   const ref = useRef<FlatList>(null);
   const [, updateTaskStatusAtom] = useAtom(updateTaskStatus);
   const [openEdit, setOpenEdit] = useState(false);
   const [taskEdit, setTaskEdit] = useState<Partial<ITask>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [hasMoreData, setHasMoreData] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(2);
   const [, addTasksAtom] = useAtom(addTasks);
-
-  useEffect(() => {
-    loadMoreTasks();
-  }, []);
-
+  const tasks = useAtomValue(Tasks);
   const loadMoreTasks = async () => {
+    const userId = await DeviceInfo.getUniqueId();
     if (!hasMoreData) return;
     setIsLoading(true);
     try {
-      const response = await API_GET({
-        url: `${PATH.TODO.GET_TODO}/pagination`,
-        params: {page: currentPage, limit: 8},
+      const res = await API_GET({
+        url: PATH.TODO.GET_TODO,
+        params: {
+          userId: userId,
+          page: currentPage,
+          limit: 8,
+        },
       });
-
-      console.log('current page:', currentPage);
-      if (response.data && Array.isArray(response.data)) {
-        const newTasks: ITask[] = response.data;
-        console.log('New Tasks:', newTasks);
-        console.log('Get tasks successfully!');
-        addTasksAtom({newTasks});
+      if (res.data && Array.isArray(res.data)) {
+        const newTasks: ITask[] = res.data;
+        addTasksAtom({newTasks: newTasks});
         if (newTasks.length === 0) {
           setHasMoreData(false);
-        } else {
-          setCurrentPage(currentPage + 1);
-        }
-      } else {
-        console.error('Error fetching more tasks: Response data is invalid');
+        } else setCurrentPage(currentPage + 1);
+        setIsLoading(false);
       }
     } catch (error) {
-      console.error('Error fetching more tasks:', error);
-    } finally {
       setIsLoading(false);
     }
   };
-
   const onEndReached = () => {
     if (!isLoading) {
       loadMoreTasks();
@@ -65,6 +56,7 @@ const ListCard = ({data = [], ...rest}: Props) => {
     return (
       <View key={index}>
         <Card
+          userId=""
           _id={item._id}
           taskName={item.taskName}
           status={item.status}
@@ -73,9 +65,14 @@ const ListCard = ({data = [], ...rest}: Props) => {
           description={item.description}
           onUpdateTaskStatus={async () => {
             // update db
-            await API_POST({
+
+            updateTaskStatusAtom({task: item});
+            await API_PUT({
               url: PATH.TODO.UPDATE_TODO,
-              request: item,
+              request: {
+                ...item,
+                status: !item.status,
+              },
             })
               .then(response => {
                 console.log(response);
@@ -83,7 +80,6 @@ const ListCard = ({data = [], ...rest}: Props) => {
               .catch(error => {
                 console.error(error);
               });
-            updateTaskStatusAtom({task: item});
           }}
           onEditTask={() => {
             setTaskEdit(item);
@@ -96,7 +92,7 @@ const ListCard = ({data = [], ...rest}: Props) => {
   return (
     <>
       <FlatList
-        data={data}
+        data={tasks}
         renderItem={renderItem}
         removeClippedSubviews
         renderToHardwareTextureAndroid
@@ -106,6 +102,7 @@ const ListCard = ({data = [], ...rest}: Props) => {
         onEndReached={onEndReached}
         onEndReachedThreshold={0.9}
         // paging
+
         //onScroll={}
       />
       {openEdit && (
@@ -119,21 +116,6 @@ const ListCard = ({data = [], ...rest}: Props) => {
       )}
     </>
   );
-  // return (
-  //   <ScrollView ref={ref}>
-  //     {data.map((item, index) => (
-  //       <View key={index}>
-  //         <Card
-  //           title={item.taskName}
-  //           status={item.status}
-  //           priority={item.priority}
-  //           simultaneousHandlers={ref}
-  //           description={item.description}
-  //         />
-  //       </View>
-  //     ))}
-  //   </ScrollView>
-  // );
 };
 
 export default ListCard;

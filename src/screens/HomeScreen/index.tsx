@@ -14,28 +14,34 @@ import {DATA} from './mock/data';
 import FloatButton from './components/FloatButton';
 import Header from './components/Header';
 import FormAddTask from './components/FormAddTask';
-import {Tasks, store} from '@state/store';
-import {useAtom} from 'jotai';
+import {DeviceId, Tasks, addTasks, store, updateDeviceId} from '@state/store';
+import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai';
 import {SlideInDown, SlideOutUp} from 'react-native-reanimated';
 import {API_GET, API_POST, TResponse} from '@services/api';
 import {PATH} from '@services/path';
+import DeviceInfo from 'react-native-device-info';
 const HomeScreen = () => {
   const [openFormAdd, setOpenAddForm] = useState(false);
   const [showButtonAdd, setShowButtonAdd] = useState(true);
-  const [tasks] = useAtom(Tasks);
+  const setTasks = useSetAtom(addTasks);
+
   useEffect(() => {
     const fetchData = async () => {
+      const deviceId = await DeviceInfo.getUniqueId();
       try {
-        const res: TResponse<ITask> = await API_GET({
+        const res: TResponse<ITask[]> = await API_GET({
           url: PATH.TODO.GET_TODO,
+          params: {
+            userId: deviceId,
+          },
         });
-        const data = res.message;
-        store.set(Tasks, [data]);
+        const data = res.data;
+        console.log('task', data);
+        setTasks({newTasks: data});
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
-
     fetchData();
   }, []);
 
@@ -47,12 +53,10 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* <Header /> */}
       <View style={{width}}>
         <ListCard
           ListHeaderComponent={<Header />}
           stickyHeaderIndices={[0]}
-          data={tasks}
           onScroll={e => {
             if (e.nativeEvent.contentOffset.y > height && showButtonAdd) {
               setShowButtonAdd(false);

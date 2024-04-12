@@ -1,10 +1,17 @@
 import {View, StyleSheet, TouchableOpacity, Keyboard} from 'react-native';
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useDeferredValue, useEffect, useState} from 'react';
 import {COLORS, width} from '@utils/colors';
 import {TextInput} from 'react-native-gesture-handler';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import DeviceInfo from 'react-native-device-info';
+import {API_GET, TResponse} from '@services/api';
+import {PATH} from '@services/path';
+import {addTasks, store, Tasks} from '@state/store';
+import {useSetAtom} from 'jotai';
 const Header = () => {
   const [search, setSearch] = useState('');
+  const defferValue = useDeferredValue(search);
+
   const onClear = useCallback(() => {
     if (search !== '') {
       setSearch('');
@@ -14,7 +21,42 @@ const Header = () => {
       Keyboard.dismiss();
     }
   }, []);
-
+  useEffect(() => {
+    const fetchData = async () => {
+      const deviceId = await DeviceInfo.getUniqueId();
+      if (defferValue.length > 0) {
+        try {
+          const res: TResponse<ITask[]> = await API_GET({
+            url: PATH.TODO.SEARCH_TODO,
+            params: {
+              userId: deviceId,
+              text: defferValue,
+            },
+          });
+          const data = res.message;
+          console.log('task', data);
+          store.set(Tasks, data);
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
+      } else {
+        try {
+          const res: TResponse<ITask[]> = await API_GET({
+            url: PATH.TODO.GET_TODO,
+            params: {
+              userId: deviceId,
+            },
+          });
+          const data = res.data;
+          console.log('task', data);
+          store.set(Tasks, data);
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
+      }
+    };
+    fetchData();
+  }, [defferValue]);
   return (
     <View style={styles.wrapper}>
       <View style={styles.searchContainer}>

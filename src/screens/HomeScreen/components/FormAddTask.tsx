@@ -13,8 +13,9 @@ import {useAtom} from 'jotai';
 import {addTask, updateTask} from '@state/store';
 import {ZoomIn, ZoomOut} from 'react-native-reanimated';
 import Animated from 'react-native-reanimated';
-import { API_POST } from '@services/api';
-import { PATH } from '@services/path';
+import {API_POST} from '@services/api';
+import {PATH} from '@services/path';
+import DeviceInfo from 'react-native-device-info';
 type TPrority = 'High' | 'Medium';
 type Props = {
   visible?: boolean;
@@ -62,7 +63,8 @@ const FormAddTask = ({
       [field]: value,
     }));
   };
-  const onAddTask = async() => {
+  const onAddTask = async () => {
+    const userId = await DeviceInfo.getUniqueId();
     if (newTask.taskName === '') {
       setError(true);
       return;
@@ -73,12 +75,12 @@ const FormAddTask = ({
 
     if (type === 'Add') {
       const newItem: ITask = {
-        id: Math.floor(Math.random() * 1000).toFixed(),
+        _id: Math.floor(Math.random() * 1000).toFixed(),
         taskName: newTask.taskName!,
         description: newTask.description,
         priority: newTask.priority!,
-        createdAt: new Date().getTime(),
-        status: 'Todo',
+        status: false,
+        userId: userId,
       };
       // add to db
       await API_POST({
@@ -93,6 +95,16 @@ const FormAddTask = ({
         });
       addTaskAtom({newItem});
     } else {
+      await API_POST({
+        url: PATH.TODO.ADD_TODO,
+        request: newTask,
+      })
+        .then(response => {
+          console.log(response);
+        })
+        .catch(error => {
+          console.error(error);
+        });
       updateTaskAtom({task: {...(newTask as ITask)}});
     }
 

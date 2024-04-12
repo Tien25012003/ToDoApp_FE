@@ -7,7 +7,8 @@ export const PATH = {
   },
   TODO: {
     ADD_TODO: '/addTask',
-    GET_TODO: '/tasks',
+    GET_TODO: '/getTodo',
+    SEARCH_TODO: '/searchTodo',
     DELETE_TODO: '/deleteTodo',
     UPDATE_TODO: '/updateTask',
   },

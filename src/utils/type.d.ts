@@ -2,10 +2,11 @@ declare interface ITask {
   _id: string;
   taskName: string;
   priority: 'High' | 'Medium';
-  status: 'Todo' | 'Done';
+  status: boolean;
   createdAt?: number;
   description?: string;
   updatedAt?: number;
+  userId: string;
 }
 declare type TExam =
   | 'R'

@@ -1,7 +1,7 @@
 import wretch, {Wretch} from 'wretch';
 //import QueryStringAddon from 'wretch/addons/queryString';
 import QueryStringAddon from '../../node_modules/wretch/dist/addons/queryString';
-const BASE_URL = 'http://192.168.1.6:3000';
+const BASE_URL = 'http://192.168.1.89:3000';
 type ParamType = string | Record<string, any>;
 export type TResponse<TMessage, T = Partial<any>> = {
   code: number;

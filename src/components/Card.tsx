@@ -24,8 +24,9 @@ import Animated, {
 } from 'react-native-reanimated';
 import {useAtom} from 'jotai';
 import {removeTask} from '@state/store';
-import { API_DELETE } from '@services/api';
-import { PATH } from '@services/path';
+import {API_DELETE} from '@services/api';
+import {PATH} from '@services/path';
+import DeviceInfo from 'react-native-device-info';
 type TCard = ITask & {
   simultaneousHandlers: any;
   onUpdateTaskStatus: () => void;
@@ -42,7 +43,7 @@ const Card = ({
   _id,
   priority = 'High',
   taskName = 'To do taskName',
-  status = 'Todo',
+  status = false,
   createdAt = 1711821657613,
   description,
   simultaneousHandlers,
@@ -52,7 +53,7 @@ const Card = ({
   const [, removeTaskAtom] = useAtom(removeTask);
 
   const cardBorderColor = useMemo(
-    () => (status === 'Todo' ? CARD_COLOR[priority] : CARD_COLOR.Done),
+    () => (status === false ? CARD_COLOR[priority] : CARD_COLOR.Done),
     [status, priority],
   );
   const startX = useSharedValue(0);
@@ -97,14 +98,15 @@ const Card = ({
     }
   };
   const onRemoveTask = async () => {
+    const userId = await DeviceInfo.getUniqueId();
     try {
       const response = await API_DELETE({
         url: PATH.TODO.DELETE_TODO,
-        params: {id: _id},
+        params: {_id: _id, userId},
       });
       if (response.success) {
         console.log('Xóa card thành công!!!');
-        console.log('ID được xóa là: '+_id);
+        console.log('ID được xóa là: ' + _id);
         removeTaskAtom({id: _id});
       } else {
         console.error(response.error);
@@ -117,7 +119,7 @@ const Card = ({
   return (
     <View style={styles.wrapper}>
       <View style={styles.actionRightContainer}>
-        {status === 'Todo' && (
+        {status === false && (
           <TouchableOpacity
             onPress={() => {
               onEditTask();
@@ -156,7 +158,7 @@ const Card = ({
             )}
           </View>
           <TouchableOpacity style={styles.circle} onPress={onUpdateTaskStatus}>
-            {status === 'Done' && (
+            {status && (
               <FontAwesome6 name="check" size={18} color={COLORS.green} />
             )}
           </TouchableOpacity>
